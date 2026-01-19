@@ -1,22 +1,26 @@
 """Authentication setup with fastapi-users."""
 
-from typing import Optional
+import logging
+
+from typing import Optional, Union
+from uuid import UUID
 
 from fastapi import Depends, Request
-from fastapi_users import BaseUserManager, FastAPIUsers
+from fastapi_users import BaseUserManager, FastAPIUsers, InvalidPasswordException
 from fastapi_users.authentication import (
     AuthenticationBackend,
     BearerTransport,
     JWTStrategy,
 )
-from fastapi_users.db import BaseUserDatabase
+from fastapi_users_db_sqlalchemy import SQLAlchemyUserDatabase
 
 from src.config import settings
 from src.database import get_async_session
 from src.models import User, get_user_db
+from src.schemas import UserCreate
 
 
-class UserManager(BaseUserManager[User, int]):
+class UserManager(BaseUserManager[User, UUID]):
     """Custom user manager."""
 
     reset_password_token_secret = settings.SECRET_KEY
@@ -26,22 +30,32 @@ class UserManager(BaseUserManager[User, int]):
         self, user: User, request: Optional[Request] = None
     ) -> None:
         """Called after successful user registration."""
-        print(f"User {user.id} has registered.")
+        logging.info(f"User {user.id} has registered.")
 
     async def on_after_forgot_password(
         self, user: User, token: str, request: Optional[Request] = None
     ) -> None:
         """Called after forgot password request."""
-        print(f"User {user.id} has forgot their password. Reset token: {token}")
+        logging.info(f"User {user.id} has forgot their password. Reset token: {token}")
 
     async def on_after_request_verify(
         self, user: User, token: str, request: Optional[Request] = None
     ) -> None:
         """Called after verification request."""
-        print(f"Verification requested for user {user.id}. Verification token: {token}")
+        logging.info(f"Verification requested for user {user.id}. Verification token: {token}")
+
+    async def validate_password(
+            self,
+            password: str,
+            user: Union[UserCreate, User],
+        ) -> None:
+        if len(password) < 8:
+            raise InvalidPasswordException(
+                reason="Password should be at least 8 characters"
+            )
 
 
-async def get_user_manager(user_db: BaseUserDatabase = Depends(get_user_db)):
+async def get_user_manager(user_db: SQLAlchemyUserDatabase = Depends(get_user_db)):
     """Get user manager dependency."""
     yield UserManager(user_db)
 
@@ -67,7 +81,7 @@ jwt_authentication = AuthenticationBackend(
 )
 
 # FastAPIUsers instance
-fastapi_users = FastAPIUsers[User, int](
+fastapi_users = FastAPIUsers[User, UUID](
     get_user_manager,
     [jwt_authentication],
 )

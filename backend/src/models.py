@@ -1,42 +1,59 @@
 """Database models."""
 
-from fastapi_users_db_sqlalchemy import SQLAlchemyUserDatabase
-from sqlalchemy import Boolean, Column, Integer, String, DateTime
-from sqlalchemy.orm import Mapped, mapped_column
 from datetime import datetime, timezone
-from fastapi_users.db import BaseUser, BaseOAuthAccount
+from uuid import uuid4, UUID
 
-from src.database import Base
+from fastapi import Depends
+from fastapi_users_db_sqlalchemy import (
+    SQLAlchemyBaseUserTableUUID,
+    SQLAlchemyUserDatabase,
+    SQLAlchemyBaseOAuthAccountTableUUID,
+)
+from sqlalchemy import Boolean, DateTime, String
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Mapped, relationship, mapped_column
+
+from src.database import Base, get_async_session
 
 
-class OAuthAccount(BaseOAuthAccount[int]):
-    """OAuth account model."""
+class OAuthAccount(SQLAlchemyBaseOAuthAccountTableUUID, Base):
+    """OAuth account model for OAuth2 authentication."""
 
     pass
 
 
-class User(Base, BaseUser[int]):
-    """User model."""
+class User(SQLAlchemyBaseUserTableUUID, Base):
+    """User model with UUID primary key and OAuth2 support."""
 
     __tablename__ = "user"
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    # UUID primary key - auto-generated
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    
+    # User credentials
     email: Mapped[str] = mapped_column(String(255), unique=True, index=True)
     username: Mapped[str] = mapped_column(String(255), unique=True, index=True)
     hashed_password: Mapped[str] = mapped_column(String(255))
+    
+    # User status
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     is_superuser: Mapped[bool] = mapped_column(Boolean, default=False)
     is_verified: Mapped[bool] = mapped_column(Boolean, default=False)
+    
+    # Timestamps
     created_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.utcnow, index=True
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime,
-        default=datetime.now(timezone.utc),
-        onupdate=lambda x: datetime.now(timezone.utc)
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+    )
+    
+    # OAuth2 accounts relationship
+    oauth_accounts: Mapped[list[OAuthAccount]] = relationship(
+        "OAuthAccount", lazy="joined", cascade="all, delete-orphan"
     )
 
 
-async def get_user_db(session):
-    """Get user database dependency."""
-    yield SQLAlchemyUserDatabase(session, User)
+async def get_user_db(session: AsyncSession = Depends(get_async_session)):
+    """Get user database dependency for fastapi-users."""
+    yield SQLAlchemyUserDatabase(session, User, OAuthAccount)

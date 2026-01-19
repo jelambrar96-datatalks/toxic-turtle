@@ -1,23 +1,24 @@
 """Main FastAPI application."""
 
 from contextlib import asynccontextmanager
+from uuid import UUID
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.database import Base, engine
+from src.auth import fastapi_users, jwt_authentication
+from src.database import engine, create_db_and_tables
 from src.config import settings
-from src.auth import fastapi_users, jwt_authentication, current_active_user
 from src.schemas import UserRead, UserCreate, UserUpdate
 from src.models import User
+from src.oauth_config import google_oauth_client
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Manage application lifespan - create tables on startup."""
     # Startup: Create tables
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    await create_db_and_tables()
     yield
     # Shutdown: Close engine
     await engine.dispose()
@@ -61,10 +62,16 @@ app.include_router(
     tags=["users"],
 )
 
+app.include_router(
+    fastapi_users.get_oauth_router(google_oauth_client, jwt_authentication, settings.SECRET_KEY),
+    prefix="/auth/google",
+    tags=["auth"],
+)
+
 
 # Example protected route
 @app.get("/users/me", response_model=UserRead, tags=["users"])
-async def get_current_user(user: User = fastapi_users.current_user(active=True)):
+async def get_current_user(user: User = Depends(fastapi_users.current_user(active=True))):
     """Get current authenticated user."""
     return user
 

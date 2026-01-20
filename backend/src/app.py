@@ -6,12 +6,10 @@ from uuid import UUID
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.auth import fastapi_users, jwt_authentication
 from src.database import engine, create_db_and_tables
 from src.config import settings
-from src.schemas import UserRead, UserCreate, UserUpdate
-from src.models import User
-from src.oauth_config import google_oauth_client
+from src.routes.auth_routes import auth_routes
+from src.routes.game_routes import router as game_router
 
 
 @asynccontextmanager
@@ -40,40 +38,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include fastapi-users router
-# JWT Login/Logout routes
-app.include_router(
-    fastapi_users.get_auth_router(jwt_authentication),
-    prefix="/auth/jwt",
-    tags=["auth"],
-)
-
-# User registration route
-app.include_router(
-    fastapi_users.get_register_router(UserRead, UserCreate),
-    prefix="/auth",
-    tags=["auth"],
-)
-
-# User profile routes (get, update, delete)
-app.include_router(
-    fastapi_users.get_users_router(UserRead, UserUpdate),
-    prefix="/users",
-    tags=["users"],
-)
-
-app.include_router(
-    fastapi_users.get_oauth_router(google_oauth_client, jwt_authentication, settings.SECRET_KEY),
-    prefix="/auth/google",
-    tags=["auth"],
-)
-
-
-# Example protected route
-@app.get("/users/me", response_model=UserRead, tags=["users"])
-async def get_current_user(user: User = Depends(fastapi_users.current_user(active=True))):
-    """Get current authenticated user."""
-    return user
+app.include_router(auth_routes)
+app.include_router(game_router)
 
 
 # Health check

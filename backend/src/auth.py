@@ -17,7 +17,7 @@ from fastapi_users_db_sqlalchemy import SQLAlchemyUserDatabase
 from src.config import settings
 from src.database import get_async_session
 from src.models import User, get_user_db
-from src.schemas import UserCreate
+from src.schemas.user_schemas import UserCreate
 
 
 class UserManager(BaseUserManager[User, UUID]):

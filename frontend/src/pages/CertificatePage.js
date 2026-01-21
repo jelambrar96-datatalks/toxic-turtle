@@ -29,7 +29,6 @@ function CertificatePage() {
       if (result.exists) {
         // Certificate already exists - fetch and display it
         const certData = await gameAPI.getCertifiedData();
-        console.log(certData)
         setCertificateData(certData);
         setFullName(certData.certificate_name);
         setShowModal(false);
@@ -74,7 +73,6 @@ function CertificatePage() {
   };
 
   const handleDownloadCertificate = () => {
-    console.log("fullName", fullName);
     if (!fullName) {
       setError('Certificate name not available');
       return;

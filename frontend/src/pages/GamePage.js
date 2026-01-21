@@ -102,7 +102,7 @@ function GamePage() {
   // Move turtle forward and draw line
   const handleForwardMovement = () => {
     setTurtleState((prev) => {
-      const distance = 40; // pixels to move
+      const distance = GameCanvas.gridDistance; // pixels to move
       let newX = prev.x;
       let newY = prev.y;
 

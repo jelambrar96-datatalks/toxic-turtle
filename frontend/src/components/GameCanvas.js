@@ -5,6 +5,8 @@ import React, { forwardRef, useEffect } from 'react';
  * Renders the turtle graphics canvas with turtle sprite and lines
  * Displays the visual output of turtle movements
  */
+const gridDistance = 50;
+
 const GameCanvas = forwardRef(({ turtleState, lineData }, ref) => {
   useEffect(() => {
     if (!ref.current) return;
@@ -31,7 +33,7 @@ const GameCanvas = forwardRef(({ turtleState, lineData }, ref) => {
     ctx.lineWidth = 1;
 
     // Vertical lines
-    for (let i = 0; i <= width; i += 50) {
+    for (let i = 0; i <= width; i += gridDistance) {
       ctx.beginPath();
       ctx.moveTo(i, 0);
       ctx.lineTo(i, height);
@@ -39,7 +41,7 @@ const GameCanvas = forwardRef(({ turtleState, lineData }, ref) => {
     }
 
     // Horizontal lines
-    for (let i = 0; i <= height; i += 50) {
+    for (let i = 0; i <= height; i += gridDistance) {
       ctx.beginPath();
       ctx.moveTo(0, i);
       ctx.lineTo(width, i);
@@ -120,5 +122,6 @@ const GameCanvas = forwardRef(({ turtleState, lineData }, ref) => {
 });
 
 GameCanvas.displayName = 'GameCanvas';
+GameCanvas.gridDistance = gridDistance;
 
 export default GameCanvas;

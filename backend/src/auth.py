@@ -5,7 +5,7 @@ import logging
 from typing import Optional, Union
 from uuid import UUID
 
-from fastapi import Depends, Request
+from fastapi import Depends, Request, HTTPException, status
 from fastapi_users import BaseUserManager, FastAPIUsers, InvalidPasswordException
 from fastapi_users.authentication import (
     AuthenticationBackend,
@@ -13,6 +13,8 @@ from fastapi_users.authentication import (
     JWTStrategy,
 )
 from fastapi_users_db_sqlalchemy import SQLAlchemyUserDatabase
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 
 from src.config import settings
 from src.database import get_async_session
@@ -21,7 +23,7 @@ from src.schemas.user_schemas import UserCreate
 
 
 class UserManager(BaseUserManager[User, UUID]):
-    """Custom user manager."""
+    """Custom user manager with duplicate email/username handling."""
 
     reset_password_token_secret = settings.SECRET_KEY
     verification_token_secret = settings.SECRET_KEY
@@ -53,6 +55,48 @@ class UserManager(BaseUserManager[User, UUID]):
             raise InvalidPasswordException(
                 reason="Password should be at least 8 characters"
             )
+        
+        # Check if password contains at least one letter
+        if not any(c.isalpha() for c in password):
+            raise InvalidPasswordException(
+                reason="Password must contain at least one letter"
+            )
+        
+        # Check if password contains at least one number
+        if not any(c.isdigit() for c in password):
+            raise InvalidPasswordException(
+                reason="Password must contain at least one number"
+            )
+
+    async def create(
+        self,
+        user_create: UserCreate,
+        safe: bool = False,
+        request: Optional[Request] = None,
+    ) -> User:
+        """Create user with duplicate email/username validation."""
+        # Check if email already exists
+        existing_email = await self.user_db.session.execute(
+            select(User).where(User.email == user_create.email)
+        )
+        if existing_email.scalar_one_or_none():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Email already registered. Please use a different email.",
+            )
+
+        # Check if username already exists
+        existing_username = await self.user_db.session.execute(
+            select(User).where(User.username == user_create.username)
+        )
+        if existing_username.scalar_one_or_none():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Username already taken. Please choose a different username.",
+            )
+
+        # Call parent create method if validation passes
+        return await super().create(user_create, safe=safe, request=request)
 
     def parse_id(self, value: any) -> UUID:
         """Parse a string ID to UUID."""

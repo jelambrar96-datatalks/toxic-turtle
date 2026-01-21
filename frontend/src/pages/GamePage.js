@@ -9,6 +9,7 @@ import '../styles/GamePage.css';
  * Game Page Component
  * Main gameplay view with code viewer and canvas
  * Handles keyboard input and game progression
+ * Restarts level on incorrect input
  */
 function GamePage() {
   const { level } = useParams();
@@ -26,6 +27,7 @@ function GamePage() {
     y: 250,
     direction: 0, // 0=up, 90=right, 180=down, 270=left
   });
+  const [showRestartMessage, setShowRestartMessage] = useState(false);
 
   const canvasRef = useRef(null);
   const lineDataRef = useRef([]);
@@ -40,16 +42,22 @@ function GamePage() {
       setLoading(true);
       const data = await gameAPI.getLevelData(levelNumber);
       setLevelData(data);
-      setCursor(0);
-      setCompleted(false);
-      setTurtleState({ x: 250, y: 250, direction: 0 });
-      lineDataRef.current = [];
+      resetLevel();
     } catch (err) {
       setError(err.message || 'Failed to load level');
       console.error(err);
     } finally {
       setLoading(false);
     }
+  };
+
+  // Reset level to initial state
+  const resetLevel = () => {
+    setCursor(0);
+    setCompleted(false);
+    setShowRestartMessage(false);
+    setTurtleState({ x: 250, y: 250, direction: 0 });
+    lineDataRef.current = [];
   };
 
   // Handle keyboard input
@@ -92,6 +100,7 @@ function GamePage() {
         updateCursor();
       } else if (e.key === ' ' || e.key.startsWith('Arrow')) {
         playSound('error');
+        handleMistake();
       }
     };
 
@@ -145,6 +154,16 @@ function GamePage() {
 
       return newCursor;
     });
+  };
+
+  // Handle mistake - restart level
+  const handleMistake = () => {
+    setShowRestartMessage(true);
+    
+    // Auto-restart after 1.5 seconds
+    setTimeout(() => {
+      resetLevel();
+    }, 1500);
   };
 
   // Handle level completion
@@ -201,6 +220,13 @@ function GamePage() {
           ← Home
         </button>
       </div>
+
+      {/* Mistake Message */}
+      {showRestartMessage && (
+        <div className="mistake-message">
+          ❌ Oops! Wrong move. Restarting level...
+        </div>
+      )}
 
       {/* Success Message */}
       {completed && (

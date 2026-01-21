@@ -1,0 +1,124 @@
+import React, { forwardRef, useEffect } from 'react';
+
+/**
+ * Game Canvas Component
+ * Renders the turtle graphics canvas with turtle sprite and lines
+ * Displays the visual output of turtle movements
+ */
+const GameCanvas = forwardRef(({ turtleState, lineData }, ref) => {
+  useEffect(() => {
+    if (!ref.current) return;
+
+    const canvas = ref.current;
+    const ctx = canvas.getContext('2d');
+
+    // Clear canvas
+    ctx.fillStyle = '#f0f8ff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Draw grid (optional visual aid)
+    drawGrid(ctx, canvas.width, canvas.height);
+
+    // Draw all lines
+    drawLines(ctx);
+
+    // Draw turtle
+    drawTurtle(ctx, turtleState);
+  }, [turtleState, lineData]);
+
+  const drawGrid = (ctx, width, height) => {
+    ctx.strokeStyle = '#e0e0e0';
+    ctx.lineWidth = 1;
+
+    // Vertical lines
+    for (let i = 0; i <= width; i += 50) {
+      ctx.beginPath();
+      ctx.moveTo(i, 0);
+      ctx.lineTo(i, height);
+      ctx.stroke();
+    }
+
+    // Horizontal lines
+    for (let i = 0; i <= height; i += 50) {
+      ctx.beginPath();
+      ctx.moveTo(0, i);
+      ctx.lineTo(width, i);
+      ctx.stroke();
+    }
+  };
+
+  const drawLines = (ctx) => {
+    ctx.strokeStyle = '#3498db';
+    ctx.lineWidth = 3;
+    ctx.lineCap = 'round';
+
+    lineData.forEach((line) => {
+      ctx.beginPath();
+      ctx.moveTo(line.startX, line.startY);
+      ctx.lineTo(line.endX, line.endY);
+      ctx.stroke();
+    });
+  };
+
+  const drawTurtle = (ctx, state) => {
+    const { x, y, direction } = state;
+
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate((direction * Math.PI) / 180);
+
+    // Draw turtle body
+    ctx.fillStyle = '#2ecc71';
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 15, 20, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Draw turtle shell pattern
+    ctx.strokeStyle = '#27ae60';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 12, 17, 0, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Draw head
+    ctx.fillStyle = '#16a085';
+    ctx.beginPath();
+    ctx.arc(0, -22, 8, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Draw eyes
+    ctx.fillStyle = 'white';
+    ctx.beginPath();
+    ctx.arc(-4, -24, 3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(4, -24, 3, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Draw pupils
+    ctx.fillStyle = 'black';
+    ctx.beginPath();
+    ctx.arc(-4, -24, 1.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(4, -24, 1.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+  };
+
+  return (
+    <div className="canvas-container">
+      <canvas
+        ref={ref}
+        width={500}
+        height={500}
+        className="game-canvas"
+      />
+    </div>
+  );
+});
+
+GameCanvas.displayName = 'GameCanvas';
+
+export default GameCanvas;

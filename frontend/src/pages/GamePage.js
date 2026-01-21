@@ -128,7 +128,7 @@ function GamePage() {
   const handleTurn = (degrees) => {
     setTurtleState((prev) => ({
       ...prev,
-      direction: (prev.direction + degrees) % 360,
+      direction: (prev.direction + degrees + 360) % 360,
     }));
   };
 

@@ -119,10 +119,10 @@ export const gameAPI = {
     return response.json();
   },
 
-  checkIfCertificateExists: async (certificateName) => {
+  checkIfCertificateExists: async () => {
     const token = getAuthToken();
     const response = await fetch(
-      `${API_BASE_URL}/game/check_if_certified_exist?certificate_name=${encodeURIComponent(certificateName)}`,
+      `${API_BASE_URL}/game/check_if_certified_exist`,
       {
         headers: { Authorization: `Bearer ${token}` },
       }

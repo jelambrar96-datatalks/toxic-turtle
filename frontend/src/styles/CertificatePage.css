@@ -132,6 +132,28 @@
   cursor: not-allowed;
 }
 
+.btn-secondary {
+  background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 1em;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+}
+
+.btn-secondary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .btn-large {
   padding: 15px 30px;
   font-size: 1.1em;
@@ -212,7 +234,16 @@
   color: white;
 }
 
-/* Responsive Design */
+.certificate-actions {
+  display: flex;
+  gap: 15px;
+  margin: 30px 0;
+}
+
+.certificate-actions button {
+  flex: 1;
+  width: 100%;
+}
 @media (max-width: 480px) {
   .certificate-container {
     padding: 20px;

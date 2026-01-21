@@ -201,26 +201,32 @@ async def register_certificate(
     return certificate
 
 
-@router.get("/get_certified_data", response_model=list[CertificateRead])
+@router.get("/get_certified_data", response_model=CertificateRead)
 async def get_certified_data(
     user: User = Depends(current_active_user),
     session: AsyncSession = Depends(get_async_session),
 ):
     """
-    Get all certificates registered for the current user.
-    Returns a list of certificates with details.
+    Get the latest certificate registered for the current user.
+    Returns a single certificate object with details.
     """
     stmt = select(Certificate).where(
         Certificate.user_id == user.id
-    ).order_by(Certificate.issued_at.desc())
+    ).order_by(Certificate.issued_at.desc()).limit(1)
     
-    certificates = await session.scalars(stmt)
-    return certificates.all()
+    certificate = await session.scalar(stmt)
+    
+    if not certificate:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No certificate found for this user",
+        )
+    
+    return certificate
 
 
 @router.get("/check_if_certified_exist", response_model=dict)
 async def check_if_certified_exist(
-    certificate_name: str,
     user: User = Depends(current_active_user),
     session: AsyncSession = Depends(get_async_session),
 ):
@@ -231,7 +237,6 @@ async def check_if_certified_exist(
         select(Certificate).where(
             and_(
                 Certificate.user_id == user.id,
-                Certificate.certificate_name == certificate_name,
             )
         )
     )
@@ -240,7 +245,6 @@ async def check_if_certified_exist(
     
     return {
         "user_id": str(user.id),
-        "certificate_name": certificate_name,
         "exists": exists,
         "issued_at": cert.issued_at if cert else None,
     }

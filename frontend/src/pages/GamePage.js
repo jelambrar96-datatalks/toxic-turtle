@@ -216,7 +216,7 @@ function GamePage() {
           <CodeViewer
             code={levelData.code}
             cursor={levelData.cursor[cursor]}
-            currentIndex={cursor}
+            currentIndex={levelData.cursor[cursor]}
           />
         </div>
 

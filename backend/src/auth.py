@@ -54,6 +54,17 @@ class UserManager(BaseUserManager[User, UUID]):
                 reason="Password should be at least 8 characters"
             )
 
+    def parse_id(self, value: any) -> UUID:
+        """Parse a string ID to UUID."""
+        if isinstance(value, UUID):
+            return value
+        try:
+            return UUID(value)
+        except (ValueError, TypeError):
+            raise InvalidPasswordException(
+                reason="Invalid user ID format"
+            )
+
 
 async def get_user_manager(user_db: SQLAlchemyUserDatabase = Depends(get_user_db)):
     """Get user manager dependency."""

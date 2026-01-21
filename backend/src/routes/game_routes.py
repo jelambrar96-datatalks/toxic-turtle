@@ -27,11 +27,11 @@ async def _check_user_can_play_level(
     Check if user can play a specific level.
     User can play level N only if they have passed all levels 1 to N-1.
     """
-    if level < 0 or level >= TOTAL_LEVELS:
+    if level < 1 or level > TOTAL_LEVELS:
         return False
     
     # First level can always be played
-    if level == 0:
+    if level == 1:
         return True
     
     # For other levels, check if all previous levels are passed
@@ -73,7 +73,7 @@ async def get_current_level(
     stmt = select(func.max(Progress.level)).where(Progress.user_id == user.id)
     result = await session.scalar(stmt)
     
-    max_level = result if result is not None else 0
+    max_level = result if result is not None else None
     
     return {
         "user_id": str(user.id),
@@ -108,21 +108,21 @@ async def pass_level(
             detail=f"Cannot pass level {progress_data.level}. Must pass all previous levels first.",
         )
     
-    # Check if user already passed this level
-    existing = await session.scalar(
-        select(Progress).where(
-            and_(
-                Progress.user_id == user.id,
-                Progress.level == progress_data.level,
-            )
-        )
-    )
+    # # Check if user already passed this level
+    # existing = await session.scalar(
+    #     select(Progress).where(
+    #         and_(
+    #             Progress.user_id == user.id,
+    #             Progress.level == progress_data.level,
+    #         )
+    #     )
+    # )
     
-    if existing:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Level {progress_data.level} already passed by this user",
-        )
+    # if existing:
+    #     raise HTTPException(
+    #         status_code=status.HTTP_400_BAD_REQUEST,
+    #         detail=f"Level {progress_data.level} already passed by this user",
+    #     )
     
     # Create new progress record
     progress = Progress(
@@ -310,7 +310,7 @@ async def get_level_data(
     - can_play: Whether user can play this level
     """
     # Validate level number
-    if level < 0 or level >= TOTAL_LEVELS:
+    if level < 1 or level > TOTAL_LEVELS:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Invalid level. Must be between 0 and {TOTAL_LEVELS - 1}",
@@ -325,12 +325,14 @@ async def get_level_data(
             detail=f"Cannot access level {level}. Must pass all previous levels first.",
         )
     
+    index_level = level - 1
+
     # Return level data
     return {
         "user_id": str(user.id),
         "level_number": level,
-        "code": CODE_LEVELS[level],
-        "movements": MOVEMENT_LEVELS[level],
-        "cursor": CURSOR_LEVELS[level],
+        "code": CODE_LEVELS[index_level],
+        "movements": MOVEMENT_LEVELS[index_level],
+        "cursor": CURSOR_LEVELS[index_level],
         "can_play": True,
     }

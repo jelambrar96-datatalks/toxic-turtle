@@ -11,7 +11,7 @@ function LevelGrid({ totalLevels, currentLevel, onLevelSelect }) {
 
     for (let i = 1; i <= totalLevels; i++) {
       const isUnlocked = currentLevel === null ? i === 1 : i <= currentLevel || i === currentLevel + 1;
-      const isPassed = currentLevel === null ? false : i < currentLevel;
+      const isPassed = currentLevel === null ? false : i <= currentLevel;
 
       buttons.push(
         <button

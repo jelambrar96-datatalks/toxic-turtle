@@ -139,6 +139,15 @@ export const gameAPI = {
     if (!response.ok) throw new Error('Failed to get certificates');
     return response.json();
   },
+
+  getUserProgressSummary: async () => {
+    const token = getAuthToken();
+    const response = await fetch(`${API_BASE_URL}/game/user_progress_summary`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!response.ok) throw new Error('Failed to get progress summary');
+    return response.json();
+  },
 };
 
 // Sound utilities

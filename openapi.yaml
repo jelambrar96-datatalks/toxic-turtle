@@ -503,8 +503,8 @@ paths:
       - game
       summary: Get Certified Data
       description: |-
-        Get all certificates registered for the current user.
-        Returns a list of certificates with details.
+        Get the latest certificate registered for the current user.
+        Returns a single certificate object with details.
       operationId: get_certified_data_game_get_certified_data_get
       responses:
         '200':
@@ -512,10 +512,7 @@ paths:
           content:
             application/json:
               schema:
-                items:
-                  "$ref": "#/components/schemas/CertificateRead"
-                type: array
-                title: Response Get Certified Data Game Get Certified Data Get
+                "$ref": "#/components/schemas/CertificateRead"
       security:
       - OAuth2PasswordBearer: []
   "/game/check_if_certified_exist":
@@ -525,31 +522,18 @@ paths:
       summary: Check If Certified Exist
       description: Check if a specific certificate exists for the current user.
       operationId: check_if_certified_exist_game_check_if_certified_exist_get
-      security:
-      - OAuth2PasswordBearer: []
-      parameters:
-      - name: certificate_name
-        in: query
-        required: true
-        schema:
-          type: string
-          title: Certificate Name
       responses:
         '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                type: object
                 additionalProperties: true
+                type: object
                 title: Response Check If Certified Exist Game Check If Certified Exist
                   Get
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/HTTPValidationError"
+      security:
+      - OAuth2PasswordBearer: []
   "/game/user_progress_summary":
     get:
       tags:
@@ -909,4 +893,3 @@ components:
         password:
           scopes: {}
           tokenUrl: auth/jwt/login
-

@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: toxic-turtle-postgres
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${DB_NAME:-toxic_turtle}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - toxic-turtle-network
+
+  # Backend Service (FastAPI)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: toxic-turtle-backend
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@postgres:5432/${DB_NAME:-toxic_turtle}
+      API_TITLE: ${API_TITLE:-Toxic Turtle API}
+      API_VERSION: ${API_VERSION:-0.1.0}
+      SECRET_KEY: ${SECRET_KEY}
+      JWT_ALGORITHM: ${JWT_ALGORITHM:-HS256}
+      JWT_EXPIRATION_HOURS: ${JWT_EXPIRATION_HOURS:-24}
+      DEBUG: ${BACKEND_DEBUG:-False}
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - toxic-turtle-network
+    restart: unless-stopped
+
+  # Frontend Service (React)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: toxic-turtle-frontend
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    environment:
+      REACT_APP_API_URL: http://backend:8000
+      REACT_APP_DEBUG: ${REACT_APP_DEBUG:-false}
+    depends_on:
+      - backend
+    networks:
+      - toxic-turtle-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  toxic-turtle-network:
+    driver: bridge

@@ -36,11 +36,12 @@ auth_routes.include_router(
     tags=["users"],
 )
 
-auth_routes.include_router(
-    fastapi_users.get_oauth_router(google_oauth_client, jwt_authentication, settings.SECRET_KEY),
-    prefix="/auth/google",
-    tags=["auth"],
-)
+if settings.GOOGLE_OAUTH_CLIENT_ID and settings.GOOGLE_OAUTH_CLIENT_SECRET:
+    auth_routes.include_router(
+        fastapi_users.get_oauth_router(google_oauth_client, jwt_authentication, settings.SECRET_KEY),
+        prefix="/auth/google",
+        tags=["auth"],
+    )
 
 
 # Example protected route

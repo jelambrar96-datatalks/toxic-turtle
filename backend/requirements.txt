@@ -1,3 +1,7 @@
+psycopg2-binary
+asyncpg
+sqlalchemy[asyncio]
+alembic
 fastapi[standard]
 fastapi-users[sqlalchemy,oauth]
 uvicorn[standard]

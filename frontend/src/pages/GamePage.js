@@ -68,7 +68,7 @@ function GamePage() {
       let isCorrect = false;
 
       // Map keys to movements
-      if (e.key === ' ') {
+      if (e.key === ' ' || e.key === 'ArrowUp') {
         e.preventDefault();
         if (movement === 'space') {
           isCorrect = true;

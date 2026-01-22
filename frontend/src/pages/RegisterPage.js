@@ -11,6 +11,7 @@ function RegisterPage() {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -19,6 +20,13 @@ function RegisterPage() {
     e.preventDefault();
     setError('');
     setLoading(true);
+
+    // Check if passwords match
+    if (password !== confirmPassword) {
+      setError('Passwords do not match. Please check and try again.');
+      setLoading(false);
+      return;
+    }
 
     try {
       const response = await authAPI.register(username, email, password);
@@ -30,7 +38,9 @@ function RegisterPage() {
       // Redirect to home
       navigate('/home');
     } catch (err) {
-      setError(err.message || 'Registration failed. Please try again.');
+      // Extract detail message from backend response if available
+      const detail = err.detail || err.message || 'Registration failed. Please try again.';
+      setError(detail);
     } finally {
       setLoading(false);
     }
@@ -76,6 +86,19 @@ function RegisterPage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              required
+              placeholder="••••••••"
+            />
+            <small className="hint-text">At least 8 characters, with letters and numbers</small>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="confirmPassword">Confirm Password</label>
+            <input
+              id="confirmPassword"
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
               required
               placeholder="••••••••"
             />

@@ -79,7 +79,7 @@ class UserManager(BaseUserManager[User, UUID]):
         existing_email = await self.user_db.session.execute(
             select(User).where(User.email == user_create.email)
         )
-        if existing_email.scalar_one_or_none():
+        if existing_email.unique().scalar_one_or_none():
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Email already registered. Please use a different email.",
@@ -89,7 +89,7 @@ class UserManager(BaseUserManager[User, UUID]):
         existing_username = await self.user_db.session.execute(
             select(User).where(User.username == user_create.username)
         )
-        if existing_username.scalar_one_or_none():
+        if existing_username.unique().scalar_one_or_none():
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Username already taken. Please choose a different username.",

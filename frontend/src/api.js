@@ -24,7 +24,12 @@ export const authAPI = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, email, password }),
     });
-    if (!response.ok) throw new Error('Registration failed');
+    if (!response.ok) {
+      const data = await response.json();
+      const error = new Error(data.detail || 'Registration failed');
+      error.detail = data.detail || 'Registration failed';
+      throw error;
+    }
     return response.json();
   },
 
@@ -38,7 +43,12 @@ export const authAPI = {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: formData,
     });
-    if (!response.ok) throw new Error('Login failed');
+    if (!response.ok) {
+      const data = await response.json();
+      const error = new Error(data.detail || 'Login failed');
+      error.detail = data.detail || 'Login failed';
+      throw error;
+    }
     return response.json();
   },
 

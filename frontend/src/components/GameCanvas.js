@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect } from 'react';
+import React, { forwardRef, useEffect, useState } from 'react';
 
 /**
  * Game Canvas Component
@@ -8,6 +8,24 @@ import React, { forwardRef, useEffect } from 'react';
 const gridDistance = 50;
 
 const GameCanvas = forwardRef(({ turtleState, lineData }, ref) => {
+  const [turtleImage, setTurtleImage] = useState(null);
+
+  // Load and parse the SVG icon once on mount
+  useEffect(() => {
+    const loadTurtleIcon = async () => {
+      try {
+        const response = await fetch('/icons/tortuga.svg');
+        const svgText = await response.text();
+        const img = new Image();
+        img.onload = () => setTurtleImage(img);
+        img.src = 'data:image/svg+xml;base64,' + btoa(svgText);
+      } catch (error) {
+        console.error('Error loading turtle icon:', error);
+      }
+    };
+    loadTurtleIcon();
+  }, []);
+
   useEffect(() => {
     if (!ref.current) return;
 
@@ -26,7 +44,7 @@ const GameCanvas = forwardRef(({ turtleState, lineData }, ref) => {
 
     // Draw turtle
     drawTurtle(ctx, turtleState);
-  }, [turtleState, lineData]);
+  }, [turtleState, lineData, turtleImage]);
 
   const drawGrid = (ctx, width, height) => {
     ctx.strokeStyle = '#e0e0e0';
@@ -69,42 +87,43 @@ const GameCanvas = forwardRef(({ turtleState, lineData }, ref) => {
     ctx.translate(x, y);
     ctx.rotate((direction * Math.PI) / 180);
 
-    // Draw turtle body
-    ctx.fillStyle = '#2ecc71';
-    ctx.beginPath();
-    ctx.ellipse(0, 0, 15, 20, 0, 0, Math.PI * 2);
-    ctx.fill();
+    // Draw turtle icon if loaded
+    if (turtleImage) {
+      ctx.drawImage(turtleImage, -20, -20, 40, 40);
+    } else {
+      // Fallback: Draw simple turtle shape while loading
+      ctx.fillStyle = '#2ecc71';
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 15, 20, 0, 0, Math.PI * 2);
+      ctx.fill();
 
-    // Draw turtle shell pattern
-    ctx.strokeStyle = '#27ae60';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.ellipse(0, 0, 12, 17, 0, 0, Math.PI * 2);
-    ctx.stroke();
+      ctx.strokeStyle = '#27ae60';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 12, 17, 0, 0, Math.PI * 2);
+      ctx.stroke();
 
-    // Draw head
-    ctx.fillStyle = '#16a085';
-    ctx.beginPath();
-    ctx.arc(0, -22, 8, 0, Math.PI * 2);
-    ctx.fill();
+      ctx.fillStyle = '#16a085';
+      ctx.beginPath();
+      ctx.arc(0, -22, 8, 0, Math.PI * 2);
+      ctx.fill();
 
-    // Draw eyes
-    ctx.fillStyle = 'white';
-    ctx.beginPath();
-    ctx.arc(-4, -24, 3, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(4, -24, 3, 0, Math.PI * 2);
-    ctx.fill();
+      ctx.fillStyle = 'white';
+      ctx.beginPath();
+      ctx.arc(-4, -24, 3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(4, -24, 3, 0, Math.PI * 2);
+      ctx.fill();
 
-    // Draw pupils
-    ctx.fillStyle = 'black';
-    ctx.beginPath();
-    ctx.arc(-4, -24, 1.5, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(4, -24, 1.5, 0, Math.PI * 2);
-    ctx.fill();
+      ctx.fillStyle = 'black';
+      ctx.beginPath();
+      ctx.arc(-4, -24, 1.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(4, -24, 1.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
 
     ctx.restore();
   };

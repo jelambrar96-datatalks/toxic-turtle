@@ -1,0 +1,266 @@
+/* Game Page Styles */
+.game-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.game-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 1200px;
+  padding: 15px 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  backdrop-filter: blur(10px);
+}
+
+.game-header h1 {
+  color: white;
+  margin: 0;
+  font-size: 2em;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.success-message {
+  width: 100%;
+  max-width: 1200px;
+  padding: 20px;
+  background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+  color: white;
+  border-radius: 10px;
+  font-size: 1.3em;
+  text-align: center;
+  font-weight: bold;
+  box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4);
+  animation: slideDown 0.5s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Game Container - Split Layout */
+.game-container {
+  display: flex;
+  gap: 20px;
+  width: 100%;
+  max-width: 1300px;
+  height: auto;
+  background: white;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.left-panel {
+  flex: 1;
+  min-width: 300px;
+  background: #f8f9fa;
+  padding: 20px;
+  border-right: 3px solid #e0e0e0;
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.right-panel {
+  flex: 1;
+  min-width: 300px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+/* Code Viewer */
+.code-viewer {
+  height: 100%;
+}
+
+.code-viewer h3 {
+  margin-top: 0;
+  color: #333;
+  font-size: 1.2em;
+}
+
+.code-content {
+  font-family: 'Courier New', monospace;
+  background: white;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  overflow-y: auto;
+  max-height: 500px;
+}
+
+.code-line {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-bottom: 1px solid #eee;
+  transition: background-color 0.3s ease;
+  position: relative;
+}
+
+.code-line:last-child {
+  border-bottom: none;
+}
+
+.code-line.active {
+  background: linear-gradient(90deg, #ffd93d 0%, rgba(255, 217, 61, 0.1) 100%);
+  font-weight: bold;
+}
+
+.line-number {
+  display: inline-block;
+  width: 30px;
+  text-align: right;
+  color: #999;
+  margin-right: 10px;
+  font-weight: bold;
+}
+
+.line-content {
+  color: #333;
+  flex: 1;
+  word-break: break-word;
+}
+
+.cursor-marker {
+  color: #ff6b6b;
+  margin-left: 10px;
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%, 49%, 100% {
+    opacity: 1;
+  }
+  50%, 99% {
+    opacity: 0;
+  }
+}
+
+/* Canvas Container */
+.canvas-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #f8f9fa;
+  border: 3px solid #3498db;
+  border-radius: 10px;
+  padding: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.game-canvas {
+  border-radius: 8px;
+  background: #f0f8ff;
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.controls-hint {
+  width: 100%;
+  background: #e3f2fd;
+  border: 2px solid #3498db;
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+  color: #333;
+  font-size: 0.95em;
+  font-weight: bold;
+}
+
+.controls-hint p {
+  margin: 5px 0;
+}
+
+/* Error State */
+.alert {
+  width: 100%;
+  max-width: 1200px;
+  padding: 15px;
+  border-radius: 8px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.alert-error {
+  background: #ff6b6b;
+  color: white;
+  border: 2px solid #ff5252;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .game-container {
+    flex-direction: column;
+    max-height: none;
+  }
+
+  .left-panel {
+    border-right: none;
+    border-bottom: 3px solid #e0e0e0;
+    max-height: 300px;
+  }
+
+  .game-header {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .game-header h1 {
+    font-size: 1.5em;
+  }
+
+  .code-content {
+    max-height: 250px;
+  }
+}
+
+@media (max-width: 480px) {
+  .game-page {
+    padding: 10px;
+  }
+
+  .game-container {
+    border-radius: 10px;
+  }
+
+  .left-panel,
+  .right-panel {
+    padding: 10px;
+  }
+
+  .code-viewer h3 {
+    font-size: 1em;
+  }
+
+  .canvas-container {
+    padding: 5px;
+  }
+
+  .controls-hint {
+    font-size: 0.85em;
+    padding: 8px;
+  }
+
+  .game-header h1 {
+    font-size: 1.2em;
+  }
+}

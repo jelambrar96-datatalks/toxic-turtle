@@ -1,7 +1,10 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.auth import jwt_authentication, fastapi_users
 from src.config import settings
+from src.database import get_async_session
 from src.models import User
 from src.oauth_config import google_oauth_client
 from src.schemas.user_schemas import UserCreate, UserRead, UserUpdate
@@ -19,7 +22,7 @@ auth_routes.include_router(
     tags=["auth"],
 )
 
-# User registration route
+# User registration route with error handling
 auth_routes.include_router(
     fastapi_users.get_register_router(UserRead, UserCreate),
     prefix="/auth",

@@ -267,19 +267,19 @@ cert = await session.execute(
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                                                                   │
+│                                                                 │
 │  ┌──────────────────┐                   ┌──────────────────┐    │
 │  │      USER        │                   │   OAUTHACCOUNT   │    │
 │  ├──────────────────┤                   ├──────────────────┤    │
 │  │ PK: id (UUID)    │─────────────────┬─│ PK: id (UUID)    │    │
-│  │ email (UNIQUE)   │     1      *     │ │ FK: user_id      │    │
-│  │ username (UNIQUE)│                  │ │ oauth_name       │    │
-│  │ hashed_password  │                  │ │ account_id       │    │
-│  │ is_active        │                  │ │ account_email    │    │
-│  │ is_verified      │                  └─│                  │    │
-│  │ created_at       │                    └──────────────────┘    │
-│  │ updated_at       │                                            │
-│  │                  │                                            │
+│  │ email (UNIQUE)   │     1      *    │ │ FK: user_id      │    │
+│  │ username (UNIQUE)│                 │ │ oauth_name       │    │
+│  │ hashed_password  │                 │ │ account_id       │    │
+│  │ is_active        │                 │ │ account_email    │    │
+│  │ is_verified      │                 └─│                  │    │
+│  │ created_at       │                   └──────────────────┘    │
+│  │ updated_at       │                                           │
+│  │                  │                                           │
 │  │                  │     ┌────────────────┬────────────────┐   │
 │  │                  │─────│                │                │   │
 │  │                  │  1  │   *            │   *            │   │
@@ -292,7 +292,7 @@ cert = await session.execute(
 │                   │ level          │   │ certificate_name │     │
 │                   │ passed_at      │   │ issued_at        │     │
 │                   └────────────────┘   └──────────────────┘     │
-│                                                                   │
+│                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 
 Legend:

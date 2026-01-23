@@ -62,7 +62,7 @@ backend/
 * Async-ready
 * Ideal for frontend-driven games
 
-----
+---
 
 ### Backend
 | Component | Technology | Version |

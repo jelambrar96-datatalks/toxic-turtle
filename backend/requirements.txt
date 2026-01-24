@@ -1,3 +1,4 @@
+aiosqlite
 psycopg2-binary
 asyncpg
 sqlalchemy[asyncio]

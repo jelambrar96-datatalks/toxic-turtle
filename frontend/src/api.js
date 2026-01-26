@@ -106,12 +106,41 @@ export const gameAPI = {
     return response.json();
   },
 
+  updateProgress: async (level, passed) => {
+    const token = getAuthToken();
+    const response = await fetch(`${API_BASE_URL}/game/pass_level`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ level }),
+    });
+    if (!response.ok) throw new Error('Failed to update progress');
+    return response.json();
+  },
+
   checkPassAllLevel: async () => {
     const token = getAuthToken();
     const response = await fetch(`${API_BASE_URL}/game/check_pass_all_level`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (!response.ok) throw new Error('Failed to check all levels');
+    return response.json();
+  },
+};
+
+// API calls for certificates
+export const certificateAPI = {
+  checkIfCertificateExist: async () => {
+    const token = getAuthToken();
+    const response = await fetch(
+      `${API_BASE_URL}/game/check_if_certified_exist`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    if (!response.ok) throw new Error('Failed to check certificate');
     return response.json();
   },
 
@@ -129,19 +158,7 @@ export const gameAPI = {
     return response.json();
   },
 
-  checkIfCertificateExists: async () => {
-    const token = getAuthToken();
-    const response = await fetch(
-      `${API_BASE_URL}/game/check_if_certified_exist`,
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
-    if (!response.ok) throw new Error('Failed to check certificate');
-    return response.json();
-  },
-
-  getCertifiedData: async () => {
+  getCertificateData: async () => {
     const token = getAuthToken();
     const response = await fetch(`${API_BASE_URL}/game/get_certified_data`, {
       headers: { Authorization: `Bearer ${token}` },
@@ -149,15 +166,16 @@ export const gameAPI = {
     if (!response.ok) throw new Error('Failed to get certificates');
     return response.json();
   },
+};
 
-  getUserProgressSummary: async () => {
-    const token = getAuthToken();
-    const response = await fetch(`${API_BASE_URL}/game/user_progress_summary`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (!response.ok) throw new Error('Failed to get progress summary');
-    return response.json();
-  },
+// Additional gameAPI methods
+gameAPI.getUserProgressSummary = async () => {
+  const token = getAuthToken();
+  const response = await fetch(`${API_BASE_URL}/game/user_progress_summary`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!response.ok) throw new Error('Failed to get progress summary');
+  return response.json();
 };
 
 // Sound utilities

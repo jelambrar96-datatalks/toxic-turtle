@@ -9,15 +9,22 @@ import CertificatePage from '../pages/CertificatePage';
 import * as api from '../api';
 
 jest.mock('../api');
+
+const mockNavigate = jest.fn();
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
-  useNavigate: () => jest.fn(),
+  useNavigate: () => mockNavigate,
 }));
 
-const renderCertificatePage = () => {
+const renderCertificatePage = (props = {}) => {
+  const defaultProps = {
+    setIsAuthenticated: jest.fn(),
+    ...props,
+  };
+
   return render(
     <BrowserRouter>
-      <CertificatePage />
+      <CertificatePage {...defaultProps}/>
     </BrowserRouter>
   );
 };
@@ -25,8 +32,13 @@ const renderCertificatePage = () => {
 describe('CertificatePage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.spyOn(console, 'error').mockImplementation(() => {});
     localStorage.clear();
     localStorage.getItem.mockReturnValue('test-token');
+  });
+
+  afterEach(() => {
+    console.error.mockRestore();
   });
 
   describe('First Visit - No Certificate', () => {

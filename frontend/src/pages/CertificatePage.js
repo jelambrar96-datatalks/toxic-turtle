@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { gameAPI, playSound } from '../api';
+import { gameAPI, certificateAPI, playSound } from '../api';
 import '../styles/CertificatePage.css';
 
 /**
@@ -24,11 +24,11 @@ function CertificatePage() {
 
   const checkCertificateStatus = async () => {
     try {
-      const result = await gameAPI.checkIfCertificateExists();
+      const result = await certificateAPI.checkIfCertificateExist();
       
       if (result.exists) {
         // Certificate already exists - fetch and display it
-        const certData = await gameAPI.getCertifiedData();
+        const certData = await certificateAPI.getCertificateData();
         setCertificateData(certData);
         setFullName(certData.certificate_name);
         setShowModal(false);
@@ -57,7 +57,7 @@ function CertificatePage() {
 
     try {
       // Register certificate (backend stores the name)
-      const response = await gameAPI.registerCertificate(fullName);
+      const response = await certificateAPI.registerCertificate(fullName);
       playSound('success');
       
       // Store certificate data and extract fullName from response
@@ -201,9 +201,6 @@ function CertificatePage() {
         {/* Header */}
         <div className="cert-header">
           <h1>🏆 Congratulations!</h1>
-          <button className="btn-secondary btn-small" onClick={handleReturnHome}>
-            ← Home
-          </button>
         </div>
 
         {/* Error Message */}
@@ -234,7 +231,7 @@ function CertificatePage() {
                   />
                 </div>
 
-                <button type="submit" className="btn-success btn-large" disabled={loading}>
+                <button type="submit" className="btn-success btn-large" disabled={loading || !fullName.trim()}>
                   {loading ? 'Generating Certificate...' : 'Generate Certificate'}
                 </button>
               </form>

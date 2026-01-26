@@ -201,9 +201,6 @@ function CertificatePage() {
         {/* Header */}
         <div className="cert-header">
           <h1>🏆 Congratulations!</h1>
-          <button className="btn-secondary btn-small" onClick={handleReturnHome}>
-            ← Home
-          </button>
         </div>
 
         {/* Error Message */}
@@ -234,7 +231,7 @@ function CertificatePage() {
                   />
                 </div>
 
-                <button type="submit" className="btn-success btn-large" disabled={loading}>
+                <button type="submit" className="btn-success btn-large" disabled={loading || !fullName.trim()}>
                   {loading ? 'Generating Certificate...' : 'Generate Certificate'}
                 </button>
               </form>

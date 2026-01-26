@@ -14,12 +14,29 @@ jest.mock('react-router-dom', () => ({
   useNavigate: () => jest.fn(),
 }));
 
-const renderHomePage = () => {
-  return render(
+const renderHomePage = () =>
+  render(
     <BrowserRouter>
       <HomePage />
     </BrowserRouter>
   );
+
+/**
+ * Helper to mock the happy-path API calls
+ */
+const mockGameState = ({
+  current_level = 1,
+  total_levels = 4,
+  all_levels_passed = false,
+} = {}) => {
+  api.gameAPI.getCurrentLevel.mockResolvedValueOnce({
+    current_level,
+    total_levels,
+  });
+
+  api.gameAPI.checkPassAllLevel.mockResolvedValueOnce({
+    all_levels_passed,
+  });
 };
 
 describe('HomePage', () => {
@@ -30,101 +47,60 @@ describe('HomePage', () => {
   });
 
   it('should render home page title', async () => {
-    api.gameAPI.getCurrentLevel.mockResolvedValueOnce({
-      current_level: 1,
-      total_levels: 4,
-    });
-    api.gameAPI.checkPassAllLevel.mockResolvedValueOnce({
-      all_levels_passed: false,
-    });
+    mockGameState();
 
     renderHomePage();
 
-    await waitFor(() => {
-      expect(screen.getByText(/🐢 Toxic Turtle/i)).toBeInTheDocument();
-    });
+    expect(
+      await screen.findByText(/🐢 Toxic Turtle/i)
+    ).toBeInTheDocument();
   });
 
   it('should display current level information', async () => {
-    api.gameAPI.getCurrentLevel.mockResolvedValueOnce({
-      current_level: 2,
-      total_levels: 4,
-    });
-    api.gameAPI.checkPassAllLevel.mockResolvedValueOnce({
-      all_levels_passed: false,
-    });
+    mockGameState({ current_level: 2 });
 
     renderHomePage();
 
-    await waitFor(() => {
-      expect(screen.getByText(/Current Level: 2 \/ 4/i)).toBeInTheDocument();
-    });
+    expect(
+      await screen.findByText(/Current Level: 2 \/ 4/i)
+    ).toBeInTheDocument();
   });
 
   it('should show logout button', async () => {
-    api.gameAPI.getCurrentLevel.mockResolvedValueOnce({
-      current_level: 1,
-      total_levels: 4,
-    });
-    api.gameAPI.checkPassAllLevel.mockResolvedValueOnce({
-      all_levels_passed: false,
-    });
+    mockGameState();
 
     renderHomePage();
 
-    await waitFor(() => {
-      expect(screen.getByRole('button', { name: /logout/i })).toBeInTheDocument();
-    })
-
+    expect(
+      await screen.findByRole('button', { name: /logout/i })
+    ).toBeInTheDocument();
   });
 
   it('should display level grid', async () => {
-    api.gameAPI.getCurrentLevel.mockResolvedValueOnce({
-      current_level: 1,
-      total_levels: 4,
-    });
-    api.gameAPI.checkPassAllLevel.mockResolvedValueOnce({
-      all_levels_passed: false,
-    });
+    mockGameState();
 
     renderHomePage();
 
     await waitFor(() => {
-      // Level grid should have at least 4 level buttons
       expect(screen.getAllByRole('button').length).toBeGreaterThanOrEqual(4);
     });
   });
 
   it('should show trophy button when all levels passed', async () => {
-    api.gameAPI.getCurrentLevel.mockResolvedValueOnce({
-      current_level: 4,
-      total_levels: 4,
-    });
-    api.gameAPI.checkPassAllLevel.mockResolvedValueOnce({
-      all_levels_passed: true,
-    });
+    mockGameState({ current_level: 4, all_levels_passed: true });
 
     renderHomePage();
 
-    await waitFor(() => {
-      expect(screen.getByText(/🏆/)).toBeInTheDocument();
-    });
+    expect(await screen.findByText(/🏆/)).toBeInTheDocument();
   });
 
   it('should not show trophy button when levels not complete', async () => {
-    api.gameAPI.getCurrentLevel.mockResolvedValueOnce({
-      current_level: 2,
-      total_levels: 4,
-    });
-    api.gameAPI.checkPassAllLevel.mockResolvedValueOnce({
-      all_levels_passed: false,
-    });
+    mockGameState({ current_level: 2 });
 
     renderHomePage();
 
     await waitFor(() => {
-      const trophyButton = screen.queryByText(/🏆 Certificate/i);
-      expect(trophyButton).not.toBeInTheDocument();
+      expect(screen.queryByText(/🏆 Certificate/i)).not.toBeInTheDocument();
     });
   });
 
@@ -139,68 +115,64 @@ describe('HomePage', () => {
   });
 
   it('should show error message on API failure', async () => {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+
     api.gameAPI.getCurrentLevel.mockRejectedValueOnce(
       new Error('Failed to fetch level')
     );
+    api.gameAPI.checkPassAllLevel.mockResolvedValueOnce({
+      all_levels_passed: false,
+    });
 
     renderHomePage();
 
-    await waitFor(() => {
-      expect(screen.getByText(/error|failed/i)).toBeInTheDocument();
-    });
+    expect(
+      await screen.findByText(/error|failed/i)
+    ).toBeInTheDocument();
+
+    console.error.mockRestore();
   });
 
   it('should show retry button on error', async () => {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+
     api.gameAPI.getCurrentLevel.mockRejectedValueOnce(
       new Error('Failed to fetch level')
     );
+    api.gameAPI.checkPassAllLevel.mockResolvedValueOnce({
+      all_levels_passed: false,
+    });
 
     renderHomePage();
 
-    await waitFor(() => {
-      expect(screen.getByRole('button', { name: /try again|retry/i })).toBeInTheDocument();
-    });
+    expect(
+      await screen.findByRole('button', { name: /try again|retry/i })
+    ).toBeInTheDocument();
+
+    console.error.mockRestore();
   });
 
   it('should handle logout click', async () => {
     const user = userEvent.setup();
-
-    api.gameAPI.getCurrentLevel.mockResolvedValueOnce({
-      current_level: 1,
-      total_levels: 4,
-    });
-    api.gameAPI.checkPassAllLevel.mockResolvedValueOnce({
-      all_levels_passed: false,
-    });
+    mockGameState();
 
     renderHomePage();
 
-    await waitFor(() => {
-      const logoutButton = screen.getByRole('button', { name: /logout/i });
-      user.click(logoutButton);
-    })
-
-    await waitFor(() => {
-      expect(api.clearAuthToken).toHaveBeenCalled();
+    const logoutButton = await screen.findByRole('button', {
+      name: /logout/i,
     });
 
+    await user.click(logoutButton);
+
+    expect(api.clearAuthToken).toHaveBeenCalled();
   });
 
   it('should unlock first level by default', async () => {
-    api.gameAPI.getCurrentLevel.mockResolvedValueOnce({
-      current_level: 1,
-      total_levels: 4,
-    });
-    api.gameAPI.checkPassAllLevel.mockResolvedValueOnce({
-      all_levels_passed: false,
-    });
+    mockGameState();
 
     renderHomePage();
 
-    await waitFor(() => {
-      const levelButtons = screen.getAllByRole('button');
-      // First level should be clickable (not disabled)
-      expect(levelButtons[0]).not.toBeDisabled();
-    });
+    const levelButtons = await screen.findAllByRole('button');
+    expect(levelButtons[0]).not.toBeDisabled();
   });
 });

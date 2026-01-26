@@ -70,7 +70,8 @@ function LoginPage({ setIsAuthenticated }) {
             />
           </div>
 
-          <button type="submit" className="btn-primary btn-large" disabled={loading}>
+          <button type="submit" className="btn-primary btn-large" 
+            disabled={loading || !email || !password}>
             {loading ? 'Logging in...' : 'Login'}
           </button>
         </form>

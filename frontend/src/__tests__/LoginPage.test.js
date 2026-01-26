@@ -9,15 +9,22 @@ import LoginPage from '../pages/LoginPage';
 import * as api from '../api';
 
 jest.mock('../api');
+
+const mockNavigate = jest.fn();
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
-  useNavigate: () => jest.fn(),
+  useNavigate: () => mockNavigate,
 }));
 
-const renderLoginPage = () => {
+const renderLoginPage = (props = {}) => {
+  const defaultProps = {
+    setIsAuthenticated: jest.fn(),
+    ...props,
+  };
+  
   return render(
     <BrowserRouter>
-      <LoginPage />
+      <LoginPage {...defaultProps} />
     </BrowserRouter>
   );
 };
@@ -25,6 +32,7 @@ const renderLoginPage = () => {
 describe('LoginPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockNavigate.mockClear();
     localStorage.clear();
   });
 
@@ -70,13 +78,14 @@ describe('LoginPage', () => {
   it('should successfully login with valid credentials', async () => {
     const user = userEvent.setup();
     const mockToken = 'test-token-123';
+    const mockSetIsAuthenticated = jest.fn();
 
     api.authAPI.login.mockResolvedValueOnce({
       access_token: mockToken,
       token_type: 'bearer',
     });
 
-    renderLoginPage();
+    renderLoginPage({ setIsAuthenticated: mockSetIsAuthenticated });
 
     const emailInput = screen.getByPlaceholderText(/email/i);
     const passwordInput = screen.getByPlaceholderText(/••••••••/i);
@@ -89,6 +98,8 @@ describe('LoginPage', () => {
     await waitFor(() => {
       expect(api.authAPI.login).toHaveBeenCalledWith('test@example.com', 'password123');
       expect(api.setAuthToken).toHaveBeenCalledWith(mockToken);
+      expect(mockSetIsAuthenticated).toHaveBeenCalledWith(true);
+      expect(mockNavigate).toHaveBeenCalledWith('/home');
     });
   });
 

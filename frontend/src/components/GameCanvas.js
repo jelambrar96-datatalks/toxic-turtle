@@ -32,6 +32,8 @@ const GameCanvas = forwardRef(({ turtleState, lineData }, ref) => {
     const canvas = ref.current;
     const ctx = canvas.getContext('2d');
 
+    if (!ctx) return;
+
     // Clear canvas
     ctx.fillStyle = '#f0f8ff';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -135,6 +137,7 @@ const GameCanvas = forwardRef(({ turtleState, lineData }, ref) => {
         width={500}
         height={500}
         className="game-canvas"
+        data-testid="game-canvas"
       />
     </div>
   );

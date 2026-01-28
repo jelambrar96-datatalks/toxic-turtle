@@ -15,6 +15,7 @@ const GameCanvas = forwardRef(({ turtleState, lineData }, ref) => {
     const loadTurtleIcon = async () => {
       try {
         const response = await fetch('/icons/tortuga.svg');
+        if (!response?.text) return;
         const svgText = await response.text();
         const img = new Image();
         img.onload = () => setTurtleImage(img);

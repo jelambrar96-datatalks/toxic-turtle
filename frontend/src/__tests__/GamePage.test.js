@@ -118,17 +118,23 @@ describe('GamePage', () => {
   });
 
   it('should show error message on API failure', async () => {
+    // Silence expected console.error
+    const consoleErrorSpy = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
+
     api.gameAPI.getLevelData.mockRejectedValueOnce(
       new Error('Failed to load level')
     );
 
     renderGamePage();
 
-    await waitFor(() => {
-      expect(
-        screen.getByText(/error|failed/i)
-      ).toBeInTheDocument();
-    });
+    // Assert UI instead of error output
+    expect(
+      await screen.findByText(/Failed to load level/i)
+    ).toBeInTheDocument();
+
+    consoleErrorSpy.mockRestore();
   });
 
 });
